@@ -1,0 +1,12 @@
+{
+  "_comment": "Copy this file to talis-aspire-local-config.json and update with your test values. The .json file is gitignored.",
+  "talisAspire": {
+    "baseUrl": "https://your-institution.rl.talis.com/",
+    "mmsIdInstitutionCode": 12345,
+    "httpBaseUrl": "http://your-institution.rl.talis.com/",
+    "relatedListsDisplayLabel": "Cited on reading lists:",
+    "displayBookmarkThisButton": true,
+    "bookmarkThisTitleAttribute": "bookmark this item to reading lists",
+    "bookmarkThisButtonText": "Send to reading lists"
+  }
+}

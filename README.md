@@ -5,6 +5,23 @@ This add-on integrates Talis Aspire Reading Lists with Ex Libris Primo NDE (New 
 1. **"Send To Reading Lists" Button** - Allows users to bookmark catalog items directly to their reading lists
 2. **"Cited on reading lists" Section** - Displays which reading lists cite the current catalog item
 
+## Features
+
+### Bookmark Button
+
+- Appears below item availability information in full record display
+- Supports MMS ID-based bookmarking (primary method)
+- Falls back to OpenURL parameters when MMS ID is not available
+- Configurable button text and tooltip
+
+### Related Lists Display
+
+- Shows reading lists that cite the current catalog item
+- Uses MMS ID lookup (primary method)
+- Falls back to ISBN lookup when MMS ID is not available
+- Clean, simple bulleted list design
+- Links open in new tabs
+
 ## Configuration
 
 This add-on is configured via Alma's Add-On Configuration. Upload a JSON configuration file with the following structure.
@@ -61,22 +78,50 @@ For most institutions, you only need to provide the two required fields:
 
 All optional fields will use their default values, and `httpBaseUrl` will be automatically generated.
 
-## Features
+## Local Development Configuration
 
-### Bookmark Button
+When developing locally using the proxy (localhost:4201), you need to provide your own test configuration since the live Primo site won't have your module's configuration.
 
-- Appears below item availability information in full record display
-- Supports MMS ID-based bookmarking (primary method)
-- Falls back to OpenURL parameters when MMS ID is not available
-- Configurable button text and tooltip
+### Setup Instructions
 
-### Related Lists Display
+1. **Copy the example config file:**
+   ```bash
+   cp src/assets/talis-aspire-local-config.json.example src/assets/talis-aspire-local-config.json
+   ```
 
-- Shows reading lists that cite the current catalog item
-- Uses MMS ID lookup (primary method)
-- Falls back to ISBN lookup when MMS ID is not available
-- Clean, simple bulleted list design
-- Links open in new tabs
+2. **Edit `src/assets/talis-aspire-local-config.json`** with your test institution's values:
+   ```json
+   {
+     "talisAspire": {
+       "baseUrl": "https://your-test-institution.rl.talis.com/",
+       "mmsIdInstitutionCode": 12345,
+       "relatedListsDisplayLabel": "Cited on reading lists:",
+       "displayBookmarkThisButton": true,
+       "bookmarkThisTitleAttribute": "bookmark this item to reading lists",
+       "bookmarkThisButtonText": "Send to reading lists"
+     }
+   }
+   ```
+
+3. **Start the development server:**
+   ```bash
+   npm start
+   ```
+
+### How It Works
+
+- The bootstrap code detects when running on port 4201 (local proxy)
+- It automatically fetches `/assets/talis-aspire-local-config.json` 
+- This config **overrides** the MODULE_PARAMETERS from the live Primo site
+- Your test values are used instead of the live configuration
+
+### Important Notes
+
+- The `talis-aspire-local-config.json` file is **gitignored** - it won't be committed to version control
+- This prevents accidentally committing sensitive test URLs or institution codes
+- Each developer maintains their own local config file with their test institution's values
+- In production, configuration comes from Alma's Add-On Configuration (not this file)
+
 
 ## Technical Details
 

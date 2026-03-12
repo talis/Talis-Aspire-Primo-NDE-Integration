@@ -2,6 +2,8 @@ import { Component, Input, OnInit, Inject, Optional } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
 import {
   getTalisAspireConfig,
   TalisAspireConfig,
@@ -12,7 +14,7 @@ import {
 @Component({
   selector: 'tarl-related-lists',
   standalone: true,
-  imports: [CommonModule, MatDividerModule],
+  imports: [CommonModule, MatDividerModule, MatIconModule, MatButtonModule],
   templateUrl: './tarl-related-lists.component.html',
   styleUrl: './tarl-related-lists.component.scss',
 })
@@ -110,5 +112,9 @@ export class TarlRelatedListsComponent implements OnInit {
       url,
       name,
     }));
+  }
+
+  openList(url: string): void {
+    window.open(url, '_blank', 'noopener,noreferrer');
   }
 }

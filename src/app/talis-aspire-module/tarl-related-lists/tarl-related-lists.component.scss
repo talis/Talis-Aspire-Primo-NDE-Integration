@@ -12,19 +12,47 @@ mat-divider {
 
 .reading-lists {
   margin: 0;
-  padding-left: 1.5rem;
-  list-style-type: disc;
+  padding-left: 0;
+  list-style-type: none;
 
   li {
     margin-bottom: 0.5rem;
 
-    a {
-      color: var(--primary-color, #1976d2);
-      text-decoration: none;
-
-      &:hover {
-        text-decoration: underline;
+    .reading-list-button {
+      .external-link-icon {
+        font-size: 1rem;
+        width: 1rem;
+        height: 1rem;
+        line-height: 1rem;
+        margin-right: 0.25rem;
       }
     }
+  }
+}
+
+// Use ::ng-deep to override Material button styles
+::ng-deep .reading-list-button {
+  // Remove all hover/focus backgrounds and ripple effects
+  &:hover,
+  &:focus,
+  &:active {
+    background-color: transparent !important;
+  }
+
+  // Add underline on hover to the text
+  &:hover .mdc-button__label {
+    text-decoration: underline !important;
+  }
+
+  // Disable all ripple-related elements
+  .mat-mdc-button-persistent-ripple,
+  .mat-ripple,
+  .mdc-button__ripple {
+    display: none !important;
+  }
+
+  // Ensure focus indicator doesn't show as background
+  .mat-focus-indicator {
+    display: none !important;
   }
 }

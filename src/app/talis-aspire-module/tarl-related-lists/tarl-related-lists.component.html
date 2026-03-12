@@ -5,11 +5,14 @@
 
   <ul class="reading-lists">
     <li *ngFor="let list of listEntries">
-      <a [href]="list.url"
-         target="_blank"
-         [attr.aria-label]="list.name + ' - Opens in new tab'">
+      <button mat-button
+              color="primary"
+              (click)="openList(list.url)"
+              [attr.aria-label]="list.name + ' - Opens in new tab'"
+              class="reading-list-button">
+        <mat-icon aria-hidden="true" class="external-link-icon">open_in_new</mat-icon>
         {{ list.name }}
-      </a>
+      </button>
     </li>
   </ul>
 </div>

@@ -13,7 +13,7 @@ sharedMappings.register(
 module.exports = {
   context: path.resolve(__dirname), // Sets the context to the directory where webpack.config.js is
   output: {
-    uniqueName: "talisAspireIntegration",
+    uniqueName: "TalisAspireIntegration",
     publicPath: "auto",
   },
   optimization: {
@@ -62,10 +62,10 @@ module.exports = {
       library: { type: "module" },
 
       // For remotes (please adjust)
-      name: "talisAspireIntegration",
+      name: "TalisAspireIntegration",
       filename: "remoteEntry.js",
       exposes: {
-        "./custom-module": "./src/bootstrap.ts",
+        "./custom-module": "./src/bootstrapTalisAspireIntegration.ts",
       },
 
       // For hosts (please adjust)

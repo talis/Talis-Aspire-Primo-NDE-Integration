@@ -1,2 +1,2 @@
-import('./bootstrap')
+import('./bootstrapTalisAspireIntegration')
 	.catch(err => console.error(err));

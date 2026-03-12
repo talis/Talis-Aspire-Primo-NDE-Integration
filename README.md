@@ -133,15 +133,20 @@ When developing locally using the proxy (localhost:4201), you need to provide yo
 
 ---
 
-Original README Info below this line
+Original README Info below this line saved for it's utility.
+[Further instructions were sourced from the Ex Libris developer blog](https://developers.exlibrisgroup.com/blog/how-to-develop-add-on-for-the-nde-ui/)
+
+---
 
 ## ✨ New Feature (9th November 2025): Support for all customization files in assets folder:
+
 All files that are you are able to customize through the assets folder of your customization package are now supported for preview when using the custom module in proxy mode.
 
 For example to preview your brand logo you can now place your customized logo file in the following path in your local project:
 `src/assets/images/library-logo.png`
 
 To start proxy mode use the command:
+
 ``` bash
 npm run start:proxy
 ```
@@ -451,8 +456,6 @@ To apply the theme go to `_customized-theme.scss` and uncomment the following li
 ```
 ---
 
-
-
 ## Developing an Add-On for the NDE UI
 
 The NDE UI supports loading of custom modules at runtime and also provides infrastructure to dynamically load add-ons developed by vendors, consortia, or community members. This enables seamless integration, allowing institutions to configure and deploy external add-ons through **Add-On Configuration in Alma**.
@@ -546,11 +549,6 @@ Results in:
 - `<audio>`
 
 > ✅ Always use `[src]="'relative/path'"` to ensure proper asset URL injection.
-
----
-
-
-
 
 ---
 

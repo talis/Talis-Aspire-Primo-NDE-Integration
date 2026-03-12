@@ -5,6 +5,7 @@ const envFilePath = path.resolve(__dirname, 'build-settings.env');
 const bootstrapPath = path.resolve(__dirname, 'src/bootstrap.ts');
 const mainPath = path.resolve(__dirname, 'src/main.ts');
 const webpackConfigPath = path.resolve(__dirname, 'webpack.config.js');
+const angularJsonPath = path.resolve(__dirname, 'angular.json');
 const assetBaseOutPath = path.resolve(__dirname, 'src/app/state/asset-base.generated.ts');
 
 if (!fs.existsSync(envFilePath)) {
@@ -44,9 +45,16 @@ if (match) {
     let webpackConfig = fs.readFileSync(webpackConfigPath, 'utf8');
     webpackConfig = webpackConfig.replace(/name:\s*["'][^"']+["']/, `name: "${addonName}"`);
     webpackConfig = webpackConfig.replace(/uniqueName:\s*["'][^"']+["']/, `uniqueName: "${addonName}"`);
-    webpackConfig = webpackConfig.replace(/'\.\/[^']+':\s*'\.\/src\/bootstrap[^']*'/, `'./${addonName}': './src/bootstrap${addonName}.ts'`);
+    webpackConfig = webpackConfig.replace(/["']\.\/[^"']+["']\s*:\s*["']\.\/src\/bootstrap[^"']*["']/, `"./custom-module": "./src/bootstrap${addonName}.ts"`);
     fs.writeFileSync(webpackConfigPath, webpackConfig);
     console.log(`Updated webpack.config.js for addon: ${addonName}`);
+
+    // Update angular.json outputPath
+    let angularJson = JSON.parse(fs.readFileSync(angularJsonPath, 'utf8'));
+    const projectName = Object.keys(angularJson.projects)[0]; // Get first project name
+    angularJson.projects[projectName].architect.build.options.outputPath = `dist/${addonName}`;
+    fs.writeFileSync(angularJsonPath, JSON.stringify(angularJson, null, 2));
+    console.log(`Updated angular.json outputPath to dist/${addonName}`);
 
 } else {
     console.log("ADDON_NAME not found in build-settings.env. Skipping renaming.");

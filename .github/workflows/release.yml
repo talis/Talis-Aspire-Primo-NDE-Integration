@@ -47,7 +47,7 @@ jobs:
       # ── Locate zip artefact ───────────────────────────────────────────────────
       # postbuild.js names the zip after ADDON_NAME.
       # We discover the path dynamically rather than hardcoding it.
-      - name: Locate zip artefact
+      - name: Locate build artefacts
         id: artefacts
         run: |
           ZIP=$(find dist -maxdepth 1 -name "*.zip" | head -1)
@@ -57,14 +57,28 @@ jobs:
             exit 1
           fi
 
-          echo "zip_path=${ZIP}"            >> "$GITHUB_OUTPUT"
-          echo "zip_name=$(basename $ZIP)"  >> "$GITHUB_OUTPUT"
-          echo "Found zip: ${ZIP}"
+          ZIP_NAME=$(basename "$ZIP")
+          DIR_NAME="${ZIP_NAME%.zip}"
+          DIR_PATH="dist/${DIR_NAME}"
+
+          if [ ! -d "$DIR_PATH" ]; then
+            echo "::error::Expected build directory not found: ${DIR_PATH}"
+            exit 1
+          fi
+
+          echo "zip_path=${ZIP}"       >> "$GITHUB_OUTPUT"
+          echo "zip_name=${ZIP_NAME}"  >> "$GITHUB_OUTPUT"
+          echo "dir_path=${DIR_PATH}"  >> "$GITHUB_OUTPUT"
+          echo "dir_name=${DIR_NAME}"  >> "$GITHUB_OUTPUT"
+          echo "Found zip: ${ZIP}, directory: ${DIR_PATH}"
 
       # ── Determine release type ────────────────────────────────────────────────
       - name: Determine release type
         id: release-type
         run: |
+          SHORT_SHA="${GITHUB_SHA::7}"
+          echo "short_sha=${SHORT_SHA}" >> $GITHUB_OUTPUT
+
           if [[ "${{ github.ref }}" == refs/tags/* ]]; then
             TAG_NAME="${GITHUB_REF#refs/tags/}"
             echo "tag_name=${TAG_NAME}" >> $GITHUB_OUTPUT
@@ -119,13 +133,20 @@ jobs:
           audience: sts.amazonaws.com
 
       # ── S3 — versioned upload (tag releases only) ─────────────────────────────
-      # Uploads the zip to a version-stamped prefix, e.g. prefix/v1.2.3/,
-      # so every tagged release is independently accessible.
+      # Uploads the zip and individual files to a version-stamped prefix, e.g.
+      # prefix/v1.2.3/, so every tagged release is independently accessible.
       - name: Upload versioned zip to S3
         if: steps.release-type.outputs.is_tag == 'true'
         run: |
           aws s3 cp "${{ steps.artefacts.outputs.zip_path }}" \
             "s3://${{ vars.S3_BUCKET_NAME }}/${{ vars.S3_KEY_PREFIX }}${{ steps.release-type.outputs.tag_name }}/${{ steps.artefacts.outputs.zip_name }}"
+
+      - name: Upload versioned files to S3
+        if: steps.release-type.outputs.is_tag == 'true'
+        run: |
+          aws s3 sync "${{ steps.artefacts.outputs.dir_path }}/" \
+            "s3://${{ vars.S3_BUCKET_NAME }}/${{ vars.S3_KEY_PREFIX }}${{ steps.release-type.outputs.tag_name }}/${{ steps.artefacts.outputs.dir_name }}/" \
+            --delete
 
       # ── S3 — upload to latest/ ────────────────────────────────────────────────
       # Always runs — keeps latest/ pointing at the current build whether this
@@ -134,3 +155,25 @@ jobs:
         run: |
           aws s3 cp "${{ steps.artefacts.outputs.zip_path }}" \
             "s3://${{ vars.S3_BUCKET_NAME }}/${{ vars.S3_KEY_PREFIX }}latest/${{ steps.artefacts.outputs.zip_name }}"
+
+      - name: Upload files to S3 latest/
+        run: |
+          aws s3 sync "${{ steps.artefacts.outputs.dir_path }}/" \
+            "s3://${{ vars.S3_BUCKET_NAME }}/${{ vars.S3_KEY_PREFIX }}latest/${{ steps.artefacts.outputs.dir_name }}/" \
+            --delete
+
+      # ── S3 — SHA-keyed upload (main branch only) ──────────────────────────────
+      # Preserves every main-branch build under its commit SHA so specific
+      # builds can be retrieved or rolled back to without relying on latest/.
+      - name: Upload zip to S3 SHA prefix
+        if: steps.release-type.outputs.is_tag == 'false'
+        run: |
+          aws s3 cp "${{ steps.artefacts.outputs.zip_path }}" \
+            "s3://${{ vars.S3_BUCKET_NAME }}/${{ vars.S3_KEY_PREFIX }}${{ steps.release-type.outputs.short_sha }}/${{ steps.artefacts.outputs.zip_name }}"
+
+      - name: Upload files to S3 SHA prefix
+        if: steps.release-type.outputs.is_tag == 'false'
+        run: |
+          aws s3 sync "${{ steps.artefacts.outputs.dir_path }}/" \
+            "s3://${{ vars.S3_BUCKET_NAME }}/${{ vars.S3_KEY_PREFIX }}${{ steps.release-type.outputs.short_sha }}/${{ steps.artefacts.outputs.dir_name }}/" \
+            --delete

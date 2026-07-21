@@ -1,18 +1,18 @@
-<div *ngIf="listsFound && listEntries.length > 0">
-  <mat-divider role="separator" class="mat-divider nde-divider full-display-divider"></mat-divider>
+<div *ngIf="listsFound && listEntries.length > 0" class="full-display-detail">
+  <h5 class="section-title mat-title-small">{{ displayLabel }}</h5>
 
-  <h4 class="section-title">{{ displayLabel }}</h4>
-
-  <ul class="reading-lists">
-    <li *ngFor="let list of listEntries">
-      <button mat-button
-              color="primary"
-              (click)="openList(list.url)"
-              [attr.aria-label]="list.name + ' - Opens in new tab'"
-              class="reading-list-button">
-        <mat-icon aria-hidden="true" class="external-link-icon">open_in_new</mat-icon>
-        {{ list.name }}
-      </button>
-    </li>
-  </ul>
+  <div>
+    <ul class="reading-lists mat-body-medium">
+      <li *ngFor="let list of listEntries">
+        <a [href]="list.url"
+           target="_blank"
+           rel="noopener noreferrer"
+           [attr.aria-label]="list.name + ' - Opens in new tab'"
+           class="hyper-text">
+          {{ list.name }}
+          <mat-icon aria-hidden="true" class="external-link-icon">open_in_new</mat-icon>
+        </a>
+      </li>
+    </ul>
+  </div>
 </div>

@@ -64,8 +64,11 @@ module.exports = {
       // For remotes (please adjust)
       name: "TalisAspireIntegration",
       filename: "remoteEntry.js",
+      // NOTE: The exposed key MUST match the add-on name (ADDON_NAME in
+      // build-settings.env) because Primo NDE resolves the remote by add-on
+      // name. prebuild.js keeps this key in sync with ADDON_NAME at build time.
       exposes: {
-        "./custom-module": "./src/bootstrapTalisAspireIntegration.ts",
+        "./TalisAspireIntegration": "./src/bootstrapTalisAspireIntegration.ts",
       },
 
       // For hosts (please adjust)

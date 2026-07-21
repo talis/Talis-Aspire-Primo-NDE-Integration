@@ -113,8 +113,4 @@ export class TarlRelatedListsComponent implements OnInit {
       name,
     }));
   }
-
-  openList(url: string): void {
-    window.open(url, '_blank', 'noopener,noreferrer');
-  }
 }

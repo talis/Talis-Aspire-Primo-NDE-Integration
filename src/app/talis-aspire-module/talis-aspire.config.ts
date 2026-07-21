@@ -26,17 +26,38 @@ export const TALIS_ASPIRE_DEFAULTS = {
 };
 
 /**
+ * Coerce a value that may arrive as a boolean or a string (Alma sends all
+ * MODULE_PARAMETERS values as strings) into a boolean.
+ */
+function coerceBoolean(value: any): boolean | undefined {
+  if (typeof value === 'boolean') {
+    return value;
+  }
+  if (typeof value === 'string') {
+    return value.trim().toLowerCase() === 'true';
+  }
+  return undefined;
+}
+
+/**
  * Get configuration with defaults applied
+ *
+ * Accepts either:
+ *  - Alma production shape: parameters are provided flat directly on
+ *    MODULE_PARAMETERS (and values arrive as strings), or
+ *  - Local dev shape: parameters are nested under a `talisAspire` key.
  */
 export function getTalisAspireConfig(moduleParameters: any): TalisAspireConfig {
-  if (!moduleParameters?.talisAspire) {
+  // Prefer nested `talisAspire` (local dev config) but fall back to the flat
+  // parameters object that Alma provides in production.
+  const config = moduleParameters?.talisAspire ?? moduleParameters;
+
+  if (!config || (!config.baseUrl && !config.mmsIdInstitutionCode)) {
     console.error(
       'Talis Aspire configuration not found in MODULE_PARAMETERS. Please configure the add-on in Alma.',
     );
     throw new Error('Talis Aspire configuration missing');
   }
-
-  const config = moduleParameters.talisAspire;
 
   // Validate required fields
   if (!config.baseUrl) {
@@ -48,16 +69,21 @@ export function getTalisAspireConfig(moduleParameters: any): TalisAspireConfig {
     );
   }
 
+  const displayBookmarkThisButton = coerceBoolean(
+    config.displayBookmarkThisButton,
+  );
+
   // Apply defaults for optional fields
   return {
-    httpBaseUrl: config.httpBaseUrl || config.baseUrl.replace('https://', 'http://'), // Convert HTTPS to HTTP if not provided
+    httpBaseUrl:
+      config.httpBaseUrl || config.baseUrl.replace('https://', 'http://'), // Convert HTTPS to HTTP if not provided
     baseUrl: config.baseUrl,
-    mmsIdInstitutionCode: config.mmsIdInstitutionCode,
+    mmsIdInstitutionCode: Number(config.mmsIdInstitutionCode),
     relatedListsDisplayLabel:
       config.relatedListsDisplayLabel ??
       TALIS_ASPIRE_DEFAULTS.relatedListsDisplayLabel,
     displayBookmarkThisButton:
-      config.displayBookmarkThisButton ??
+      displayBookmarkThisButton ??
       TALIS_ASPIRE_DEFAULTS.displayBookmarkThisButton,
     bookmarkThisTitleAttribute:
       config.bookmarkThisTitleAttribute ??

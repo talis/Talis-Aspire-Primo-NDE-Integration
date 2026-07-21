@@ -1,58 +1,48 @@
 // Cited on Reading Lists styling
 
-mat-divider {
-  margin-top: 0.625rem;
+.full-display-detail {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  margin-top: -0.5rem;
 }
 
 .section-title {
-  margin: 1rem 0 0.5rem 0;
-  font-weight: 500;
-  font-size: 1rem;
+  min-width: 9rem;
+  white-space: normal;
+  word-break: break-word;
 }
 
 .reading-lists {
-  margin: 0;
-  padding-left: 0;
-  list-style-type: none;
+  list-style: initial;
+  padding-left: 15px;
+}
 
-  li {
-    margin-bottom: 0.5rem;
+.hyper-text {
+  text-decoration: none;
+  color: var(--sys-primary);
 
-    .reading-list-button {
-      .external-link-icon {
-        font-size: 1rem;
-        width: 1rem;
-        height: 1rem;
-        line-height: 1rem;
-        margin-right: 0.25rem;
-      }
-    }
+  &:hover {
+    text-decoration: underline;
+  }
+
+  .external-link-icon {
+    font-size: 0.875rem;
+    width: 1rem;
+    height: 1rem;
+    line-height: 1rem;
+    vertical-align: center;
   }
 }
 
-// Use ::ng-deep to override Material button styles
-::ng-deep .reading-list-button {
-  // Remove all hover/focus backgrounds and ripple effects
-  &:hover,
-  &:focus,
-  &:active {
-    background-color: transparent !important;
+@media only screen and (min-width: 600px) {
+  .full-display-detail {
+    flex-direction: row;
+    margin-top: 0.5rem;
   }
 
-  // Add underline on hover to the text
-  &:hover .mdc-button__label {
-    text-decoration: underline !important;
-  }
-
-  // Disable all ripple-related elements
-  .mat-mdc-button-persistent-ripple,
-  .mat-ripple,
-  .mdc-button__ripple {
-    display: none !important;
-  }
-
-  // Ensure focus indicator doesn't show as background
-  .mat-focus-indicator {
-    display: none !important;
+  .section-title {
+    width: 9rem;
+    margin-right: 1rem !important;
   }
 }

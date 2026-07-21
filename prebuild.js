@@ -45,6 +45,9 @@ if (match) {
     let webpackConfig = fs.readFileSync(webpackConfigPath, 'utf8');
     webpackConfig = webpackConfig.replace(/name:\s*["'][^"']+["']/, `name: "${addonName}"`);
     webpackConfig = webpackConfig.replace(/uniqueName:\s*["'][^"']+["']/, `uniqueName: "${addonName}"`);
+    // Keep the Module Federation share scope isolated per add-on so shared
+    // singletons never resolve to another vendor's remote on the same page.
+    webpackConfig = webpackConfig.replace(/shareScope:\s*["'][^"']+["']/, `shareScope: "${addonName}"`);
     // Keep the exposed module key in sync with the add-on name. Primo NDE
     // resolves the remote by add-on name, so the exposed key must equal it.
     webpackConfig = webpackConfig.replace(/["']\.\/[^"']+["']\s*:\s*["']\.\/src\/bootstrap[^"']*["']/, `"./${addonName}": "./src/bootstrap${addonName}.ts"`);

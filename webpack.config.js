@@ -64,6 +64,13 @@ module.exports = {
       // For remotes (please adjust)
       name: "TalisAspireIntegration",
       filename: "remoteEntry.js",
+      // Isolate this add-on's Module Federation share scope from other add-ons
+      // loaded on the same Primo NDE page (e.g. LibKey, LibChat). Without an
+      // isolated scope, shared singletons (@ngrx/store, @ngx-translate/core,
+      // @angular/*) can be provided by another vendor's remote, causing our
+      // code to load their chunks from their host and fail with ChunkLoadError.
+      // Keep this in sync with the add-on name (prebuild.js updates it).
+      shareScope: "TalisAspireIntegration",
       // NOTE: The exposed key MUST match the add-on name (ADDON_NAME in
       // build-settings.env) because Primo NDE resolves the remote by add-on
       // name. prebuild.js keeps this key in sync with ADDON_NAME at build time.

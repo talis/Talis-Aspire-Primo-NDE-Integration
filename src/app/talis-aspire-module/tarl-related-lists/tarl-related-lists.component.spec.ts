@@ -134,6 +134,73 @@ describe('TarlRelatedListsComponent', () => {
     });
   });
 
+  describe('ngOnChanges', () => {
+    it('should re-fetch lists when a new host record is pushed', () => {
+      // Initial record + config
+      component['hostComponent'] = { searchResult: mockMmsItem };
+      component.ngOnInit();
+
+      spyOn<any>(component, 'fetchListsForMmsId');
+
+      // Simulate Primo pushing a different record (non-first change)
+      const newItem = {
+        pnx: { display: { mms: ['999876543211234'] } },
+      };
+      component['hostComponent'] = { searchResult: newItem };
+      component.ngOnChanges({
+        hostComponent: {
+          previousValue: { searchResult: mockMmsItem },
+          currentValue: { searchResult: newItem },
+          firstChange: false,
+          isFirstChange: () => false,
+        },
+      });
+
+      expect(component['fetchListsForMmsId']).toHaveBeenCalledWith(
+        '999876543211234',
+      );
+    });
+
+    it('should reset previously loaded lists before re-fetching', () => {
+      component['hostComponent'] = { searchResult: mockMmsItem };
+      component.ngOnInit();
+      component.listsFound = {
+        'https://test.rl.talis.com/lists/OLD': 'Stale list',
+      };
+
+      component['hostComponent'] = { searchResult: mockIsbnItem };
+      component.ngOnChanges({
+        hostComponent: {
+          previousValue: { searchResult: mockMmsItem },
+          currentValue: { searchResult: mockIsbnItem },
+          firstChange: false,
+          isFirstChange: () => false,
+        },
+      });
+
+      // Old list cleared; new fetches are async so listsFound is null here
+      expect(component.listsFound).toBeNull();
+    });
+
+    it('should ignore the first change (handled by ngOnInit)', () => {
+      component['hostComponent'] = { searchResult: mockMmsItem };
+      component.ngOnInit();
+
+      spyOn<any>(component, 'fetchListsForMmsId');
+
+      component.ngOnChanges({
+        hostComponent: {
+          previousValue: undefined,
+          currentValue: { searchResult: mockMmsItem },
+          firstChange: true,
+          isFirstChange: () => true,
+        },
+      });
+
+      expect(component['fetchListsForMmsId']).not.toHaveBeenCalled();
+    });
+  });
+
   describe('fetchListsForMmsId', () => {
     it('should call fetchLists with correct MMS ID URL', () => {
       component['hostComponent'] = { searchResult: mockMmsItem };

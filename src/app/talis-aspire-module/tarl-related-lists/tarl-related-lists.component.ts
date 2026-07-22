@@ -1,4 +1,12 @@
-import { Component, Input, OnInit, Inject, Optional } from '@angular/core';
+import {
+  Component,
+  Input,
+  OnInit,
+  OnChanges,
+  SimpleChanges,
+  Inject,
+  Optional,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { MatDividerModule } from '@angular/material/divider';
@@ -18,7 +26,7 @@ import {
   templateUrl: './tarl-related-lists.component.html',
   styleUrl: './tarl-related-lists.component.scss',
 })
-export class TarlRelatedListsComponent implements OnInit {
+export class TarlRelatedListsComponent implements OnInit, OnChanges {
   @Input() private hostComponent!: any; // Provided by Primo NDE
 
   listsFound: { [url: string]: string } | null = null;
@@ -39,6 +47,25 @@ export class TarlRelatedListsComponent implements OnInit {
       console.error('Failed to load Talis Aspire configuration:', error);
       return;
     }
+
+    // Initial load for the record present when the component is created.
+    this.loadListsForCurrentRecord();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    // Primo reuses this component instance and pushes a new record when the
+    // user navigates between records in full display (e.g. the record-selector
+    // buttons). Re-fetch whenever a new host record is bound. The first change
+    // is handled by ngOnInit once config is ready, so it is skipped here.
+    const hostChange = changes['hostComponent'];
+    if (hostChange && !hostChange.isFirstChange() && this.config) {
+      this.loadListsForCurrentRecord();
+    }
+  }
+
+  private loadListsForCurrentRecord(): void {
+    // Clear any lists carried over from the previously displayed record.
+    this.listsFound = null;
 
     // Get search result from host component
     const item = this.hostComponent?.searchResult;

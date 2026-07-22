@@ -5,43 +5,80 @@
 
 This add-on integrates Talis Aspire Reading Lists with Ex Libris Primo NDE (New Discovery Experience), providing:
 
-1. **"Send To Reading Lists" Button** - Allows users to bookmark catalog items directly to their reading lists
+1. **"Send To Reading Lists" Bookmark This Button** - Allows users to bookmark catalog items directly to their reading lists
 2. **"Cited on reading lists" Section** - Displays which reading lists cite the current catalog item
 
 ## Features
 
-### Bookmark Button
+### Bookmark This Button
 
 - Appears below item availability information in full record display
-- Supports MMS ID-based bookmarking (primary method)
-- Falls back to OpenURL parameters when MMS ID is not available
+- Appears as part of each search result
+- Supports MMS_ID based bookmarking (primary method)
+- Falls back to OpenURL parameters when MMS_ID is not available
 - Configurable button text and tooltip
 
 ### Related Lists Display
 
-- Shows reading lists that cite the current catalog item
+- Shows reading lists that cite the current catalogue item
 - Uses MMS ID lookup (primary method)
 - Falls back to ISBN lookup when MMS ID is not available
 - Clean, simple bulleted list design
 - Links open in new tabs
 
-## Customer Configuration Steps
+## Installation
 
-Library system managers can easily add, configure, and manage these add-ons through Alma. You will need to know:
+You have a choice between self hosting or a Talis hosted version.
 
-- **Add-on Name** – `TalisAspireIntegration`
-- **Add-on URL** – `https://github.com/talis/Talis-Aspire-Primo-NDE-Integration/releases/download/latest/TalisAspireIntegration.zip` This URL will always point to the latest released version of this plugin.
-- **Configuration Parameters** – JSON-based config parameters to be referenced at runtime by the add-on. The available paramters are discussed below.
+### Talis hosted
+
+You will want to do this if...
+
+- You don't have a server that you can host the files on
+- You don't want to deal with the complexity of self hosting
+- You always want to have the latest version deployed
+- You don't want to have to re-upload files when a new version is released.
+
+Installation steps:
+
+- You will need to write a configuration file with your tenant's information.
+- You will need to decide if you want to enable the 'bookmark this' button.
+- You will then follow the Customer Configuration Steps below
+- The **Add-on URL** you need will be `https://talis-cs-production-primo-nde-eu-west-1.s3.eu-west-1.amazonaws.com/latest/TalisAspireIntegration/remoteEntry.js`
+
+### Self Hosting
+
+You might want to do this if...
+
+- You want to control when changes are made.
+- You want to do additional customisations. We recommend you fork this repository before making changes so that you can pull in other upstream fixes in the future.
+- You are happy that Talis are unable to support a self hosted version, as there may have been changes that we are not aware of.
+
+Installation steps:
+
+- Download the ZIP file for the [latest version](https://github.com/talis/Talis-Aspire-Primo-NDE-Integration/releases/download/latest/TalisAspireIntegration.zip)
+- Upload the ZIP file to your server and Unzip it.
+- You will now have a directory full of the files that will be injected into Primo as the Addon.
+- Use the URL of your new directory as the **Add-On URL** in the primo configuration
+- You may need to add a CORS policy to your hosted directory if the domains are not the same as your Primo domain.
+
+## Configuration in Primo
+
+Library system managers can easily add, configure, and manage these add-ons through the Primo/Alma configuration tools provided by Ex Libris. You will need to know:
+
+- **Add-on Name** – `TalisAspireIntegration` This is important. Don't call it anything else as it won't load properly!
+- **Add-on URL** – This will depend whether you chose to self host or use the Talis hosted version of the add-on See the previous section for the Talis hosted URL.
+- **Configuration Parameters** – JSON-based config parameters to be referenced at runtime by the add-on. The available parameters are discussed below.
 
 In Primo you will configure an addon: the screen looks like this
 
 ![Add-on Overview](./readme-files/addon-overview.png)
 
-[Instructions for managing Add-Ons in the NDE User Interface](https://knowledge.exlibrisgroup.com/Primo/Product_Documentation/020Primo_VE/Primo_VE_(English)/120Other_Configurations/Managing_Add-Ons_for_the_NDE_UI)
+Please refer to the Ex libris [Primo Instructions for managing Add-Ons in the NDE User Interface](https://knowledge.exlibrisgroup.com/Primo/Product_Documentation/020Primo_VE/Primo_VE_(English)/120Other_Configurations/Managing_Add-Ons_for_the_NDE_UI)
 
 ## Configuration Parameters
 
-This add-on is configured via Alma's Add-On Configuration. Upload a JSON configuration file with the following structure.
+This add-on is configured via Primo/Alma's Add-On Configuration. Upload a JSON configuration file with the following structure.
 
 See [talis-aspire-config-example.json](talis-aspire-config-example.json) in this repo for a complete configuration template.
 
@@ -52,7 +89,7 @@ See [talis-aspire-config-example.json](talis-aspire-config-example.json) in this
 #### Required Fields
 
 - **`baseUrl`** (string, **REQUIRED**): Your Talis Aspire tenancy base URL with trailing slash (HTTPS)
-  - Example: `"https://youruni.rl.talis.com/"`
+  - Example: `"https://youruni.rl.talis.com/"` simply replace `youruni` with your tenant name.
   
 - **`mmsIdInstitutionCode`** (number, **REQUIRED**): The last four digits of your institution's MMS IDs
   - Example: `1234` for MMS IDs like `9912345678901234`
@@ -95,7 +132,11 @@ For most institutions, you only need to provide the two required fields:
 
 All optional fields will use their default values, and `httpBaseUrl` will be automatically generated.
 
+---
+
 ## Local Development Configuration
+
+You only need to read the rest of this README if you plan to do local development!
 
 When developing locally using the proxy (localhost:4201), you need to provide your own test configuration since the live Primo site won't have your module's configuration.
 
@@ -334,6 +375,7 @@ Or as Observable:
 ```angular2html
 isLoggedIn$ = this.store.select(selectIsLoggedIn);
 ```
+
 ### Automatic assets public path (`assets/...`)
 
 If your custom module/add-on is hosted under a dynamic base URL, plain template URLs like:
@@ -341,6 +383,7 @@ If your custom module/add-on is hosted under a dynamic base URL, plain template 
 ```html
 <img src="assets/images/logo.png" />
 ```
+
 may break, because the browser resolves them relative to the host page.
 
 To fix this, we provide:
@@ -352,6 +395,7 @@ This directive automatically rewrites any src / href that starts with assets/ (o
 ```js
 __webpack_public_path__ + 'assets/...'
 ```
+
 Import the directive in a component (Standalone)
 Add the directive to the component imports:
 
@@ -369,6 +413,7 @@ import { AssetsPublicPathDirective } from '../services/assets-public-path.direct
 })
 export class ExampleComponent {}
 ```
+
 If the component is not standalone (NgModule-based), import and export the directive from a shared module, and include that module where your components are declared.
 
 Use it in HTML
@@ -385,6 +430,7 @@ After the directive is imported, you can use plain assets/... paths in templates
 <!-- Links to files -->
 <a href="assets/files/help.pdf">Help</a>
 ```
+
 Supported attributes/elements (common cases):
 
 img[src]
@@ -416,18 +462,16 @@ this.routerSubscription = this.router.events.subscribe((event) => {
 });
 ```
 
-
-
-### Translating from code tables 
+### Translating from code tables
 
 You can translate codes in your custom component by using ngx-translate (https://github.com/ngx-translate/core).
 
 - If you are using a stand alone component you will need to add the TranslateModule to your component imports list.
 - In your components HTML you can translate a label like so:
+
 ```angular2html
 <span>This is some translated code: {{'delivery.code.ext_not_restricted' | translate}}</span>
 ```
-
 
 ---
 
@@ -442,11 +486,14 @@ We allow via the view configuration to choose between a number of pre built them
 If you want to create your own theme instead of using one of our options follow these steps:
 
 1. Create a material 3 theme by running:
+
     ```bash
     ng generate @angular/material:m3-theme
-    ``` 
+    ```
+
    You will be prompted to answer a number of questions like so:
-  ```
+
+  ```txt
 ? What HEX color should be used to generate the M3 theme? It will represent your primary color palette. (ex. #ffffff) #1eba18
 ? What HEX color should be used represent the secondary color palette? (Leave blank to use generated colors from Material)
 ? What HEX color should be used represent the tertiary color palette? (Leave blank to use generated colors from Material)
@@ -454,9 +501,9 @@ If you want to create your own theme instead of using one of our options follow 
 ? What is the directory you want to place the generated theme file in? (Enter the relative path such as 'src/app/styles/' or leave blank to generate at your project root) src/app/styles/
 ? Do you want to use system-level variables in the theme? System-level variables make dynamic theming easier through CSS custom properties, but increase the bundle size. yes
 ? Choose light, dark, or both to generate the corresponding themes light
-
 ```
-- Note that it is imporant to answer yes when asked if you want to use system-level variables.
+
+- Note that it is important to answer yes when asked if you want to use system-level variables.
 
 - Also note that I'm only entering the primary color and not secondary or tertiary. They will be selected automatically based on my primary color.
 
@@ -465,12 +512,14 @@ Once this script completes successfully you will recieve this message:
 `CREATE src/app/styles/m3-theme.scss (2710 bytes)`
 
 To apply the theme go to `_customized-theme.scss` and uncomment the following lines:
-```
+
+```javascript
 .custom-nde-theme{
   @include mat.all-component-colors(m3-theme.$light-theme);
   @include mat.system-level-colors(m3-theme.$light-theme);
 }
 ```
+
 ---
 
 ## Developing an Add-On for the NDE UI
@@ -541,25 +590,28 @@ If your add-on includes assets such as images, you can ensure a complete separat
 
 ![Access Assets via ASSET_BASE_URL](./readme-files/access-assets.png)
 
-
 The `autoAssetSrc` directive automatically prepends `ASSET_BASE_URL` to your `[src]` attribute.
 
-### Example:
+### Example
+
 ```html
 <img autoAssetSrc [src]="'assets/images/logo.png'" />
 ```
 
 With:
+
 ```env
 ASSET_BASE_URL=http://il-urm08.corp.exlibrisgroup.com:4202/
 ```
 
 Results in:
+
 ```html
 <img src="http://il-urm08.corp.exlibrisgroup.com:4202/assets/images/logo.png" />
 ```
 
-### Supported Elements:
+### Supported Elements
+
 - `<img>`
 - `<source>`
 - `<video>`
@@ -602,11 +654,13 @@ To ensure smooth development, debugging, and code management, we recommend setti
 
 - **Node Version Manager (nvm)**  
   Manage multiple versions of Node.js easily:
+
   ```bash
   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
   ```
 
 - **Angular CLI**
+
   ```bash
   npm install -g @angular/cli
   ```
@@ -632,10 +686,13 @@ To ensure smooth development, debugging, and code management, we recommend setti
 - **Nx** – Monorepo tool (if planning multiple apps/libraries).
 
 ---
+
 ## Build the Project
 
 ### Step 5: Build the Project
+
 1. Compile the project:
+
     ```bash
     npm run build
     ```
@@ -645,18 +702,22 @@ To ensure smooth development, debugging, and code management, we recommend setti
 
 - **Automatic Packaging**:
   - The build process automatically compiles and packages the project into a ZIP file named according to the `INST_ID` and `VIEW_ID` specified in the `build-settings.env` file located at:
-    ```
+
+    ```txt
     C:\env\nde\customModule-base\build-settings.env
     ```
+
   - Example configuration:
-    ```
+
+    ```txt
     INST_ID=DEMO_INST
     VIEW_ID=Auto1
     ```
+
   - The ZIP file, e.g., `DEMO_INST-Auto1.zip`, is automatically created in the `dist/` directory after a successful build.
 
-
 ### Step 6: Upload Customization Package to Alma
+
 1. In Alma, navigate to **Discovery > View List > Edit**.
 2. Go to the **Manage Customization Package** tab.
 3. Upload your zipped package in the **Customization Package** field and save.
@@ -668,13 +729,12 @@ To ensure smooth development, debugging, and code management, we recommend setti
 ## Additional Resources
 
 ### Live Demo Tutorial
+
 - **Customize Primo NDE UI**: Watch our live demo on YouTube for a visual guide on how to customize the Primo NDE UI:
   [Customize Primo NDE UI: Live Demo](https://www.youtube.com/watch?v=j6jAYkawDSM)
-
-
 
 ---
 
 ## Conclusion
-By following these steps, you can customize and extend the NDE interface using the `CustomModule` package. If you have any questions or run into issues, refer to the project documentation or the ExLibris support.
 
+By following these steps, you can customize and extend the NDE interface using the `CustomModule` package. If you have any questions or run into issues, refer to the project documentation or the ExLibris support.

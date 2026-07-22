@@ -2,8 +2,7 @@ import {
   Component,
   Input,
   OnInit,
-  OnChanges,
-  SimpleChanges,
+  DoCheck,
   Inject,
   Optional,
 } from '@angular/core';
@@ -26,12 +25,16 @@ import {
   templateUrl: './tarl-related-lists.component.html',
   styleUrl: './tarl-related-lists.component.scss',
 })
-export class TarlRelatedListsComponent implements OnInit, OnChanges {
+export class TarlRelatedListsComponent implements OnInit, DoCheck {
   @Input() private hostComponent!: any; // Provided by Primo NDE
 
   listsFound: { [url: string]: string } | null = null;
   displayLabel = '';
   private config!: TalisAspireConfig;
+
+  // Tracks the last searchResult we fetched for, so we can detect when Primo
+  // swaps in a different record (see ngDoCheck).
+  private lastSearchResult: unknown;
 
   constructor(
     private http: HttpClient,
@@ -49,16 +52,22 @@ export class TarlRelatedListsComponent implements OnInit, OnChanges {
     }
 
     // Initial load for the record present when the component is created.
+    this.lastSearchResult = this.hostComponent?.searchResult;
     this.loadListsForCurrentRecord();
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    // Primo reuses this component instance and pushes a new record when the
-    // user navigates between records in full display (e.g. the record-selector
-    // buttons). Re-fetch whenever a new host record is bound. The first change
-    // is handled by ngOnInit once config is ready, so it is skipped here.
-    const hostChange = changes['hostComponent'];
-    if (hostChange && !hostChange.isFirstChange() && this.config) {
+  ngDoCheck(): void {
+    // Primo reuses this component instance when the user navigates between
+    // records in full display (e.g. the next/previous record buttons). It does
+    // not re-bind the hostComponent input, so ngOnChanges never fires; instead
+    // it reassigns hostComponent.searchResult to a new record object. Detect
+    // that reference change and re-fetch for the newly displayed record.
+    if (!this.config) {
+      return;
+    }
+    const currentSearchResult = this.hostComponent?.searchResult;
+    if (currentSearchResult !== this.lastSearchResult) {
+      this.lastSearchResult = currentSearchResult;
       this.loadListsForCurrentRecord();
     }
   }

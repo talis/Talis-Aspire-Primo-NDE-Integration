@@ -134,27 +134,21 @@ describe('TarlRelatedListsComponent', () => {
     });
   });
 
-  describe('ngOnChanges', () => {
-    it('should re-fetch lists when a new host record is pushed', () => {
+  describe('ngDoCheck', () => {
+    it('should re-fetch lists when Primo swaps in a new record', () => {
       // Initial record + config
       component['hostComponent'] = { searchResult: mockMmsItem };
       component.ngOnInit();
 
       spyOn<any>(component, 'fetchListsForMmsId');
 
-      // Simulate Primo pushing a different record (non-first change)
+      // Primo reuses the instance and reassigns searchResult to a new record
+      // object (a new reference) when navigating between records.
       const newItem = {
         pnx: { display: { mms: ['999876543211234'] } },
       };
-      component['hostComponent'] = { searchResult: newItem };
-      component.ngOnChanges({
-        hostComponent: {
-          previousValue: { searchResult: mockMmsItem },
-          currentValue: { searchResult: newItem },
-          firstChange: false,
-          isFirstChange: () => false,
-        },
-      });
+      component['hostComponent'].searchResult = newItem;
+      component.ngDoCheck();
 
       expect(component['fetchListsForMmsId']).toHaveBeenCalledWith(
         '999876543211234',
@@ -168,34 +162,31 @@ describe('TarlRelatedListsComponent', () => {
         'https://test.rl.talis.com/lists/OLD': 'Stale list',
       };
 
-      component['hostComponent'] = { searchResult: mockIsbnItem };
-      component.ngOnChanges({
-        hostComponent: {
-          previousValue: { searchResult: mockMmsItem },
-          currentValue: { searchResult: mockIsbnItem },
-          firstChange: false,
-          isFirstChange: () => false,
-        },
-      });
+      component['hostComponent'].searchResult = mockIsbnItem;
+      component.ngDoCheck();
 
       // Old list cleared; new fetches are async so listsFound is null here
       expect(component.listsFound).toBeNull();
     });
 
-    it('should ignore the first change (handled by ngOnInit)', () => {
+    it('should not re-fetch when the record has not changed', () => {
       component['hostComponent'] = { searchResult: mockMmsItem };
       component.ngOnInit();
 
       spyOn<any>(component, 'fetchListsForMmsId');
 
-      component.ngOnChanges({
-        hostComponent: {
-          previousValue: undefined,
-          currentValue: { searchResult: mockMmsItem },
-          firstChange: true,
-          isFirstChange: () => true,
-        },
-      });
+      // Same searchResult reference => no navigation => no re-fetch
+      component.ngDoCheck();
+
+      expect(component['fetchListsForMmsId']).not.toHaveBeenCalled();
+    });
+
+    it('should do nothing when config failed to load', () => {
+      // No ngOnInit call => config is undefined
+      spyOn<any>(component, 'fetchListsForMmsId');
+      component['hostComponent'] = { searchResult: mockMmsItem };
+
+      component.ngDoCheck();
 
       expect(component['fetchListsForMmsId']).not.toHaveBeenCalled();
     });

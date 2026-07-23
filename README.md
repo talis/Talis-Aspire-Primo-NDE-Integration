@@ -123,10 +123,8 @@ For most institutions, you only need to provide the two required fields:
 
 ```json
 {
-  "talisAspire": {
     "baseUrl": "https://youruni.rl.talis.com/",
     "mmsIdInstitutionCode": 1234
-  }
 }
 ```
 
@@ -148,6 +146,8 @@ When developing locally using the proxy (localhost:4201), you need to provide yo
    ```
 
 2. **Edit `src/assets/talis-aspire-local-config.json`** with your test institution's values:
+  Note that this is a nested structure for local development. When used in production this will not be nested under `talisAspire`!
+
    ```json
    {
      "talisAspire": {

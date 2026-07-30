@@ -89,7 +89,7 @@ See [talis-aspire-config-example.json](talis-aspire-config-example.json) in this
 #### Config Builder Tool
 
 Not sure what to put in your configuration file? Use the
-[Config Builder](https://talis-cs-production-primo-nde-eu-west-1.s3.eu-west-1.amazonaws.com/config-builder/)
+[Config Builder](https://talis-cs-production-primo-nde-eu-west-1.s3.eu-west-1.amazonaws.com/config-builder/index.html)
 — a self-contained page that looks up your institution, works out `baseUrl` (and `httpBaseUrl` if you need it),
 explains each of the optional settings, and lets you copy or download the finished JSON.
 
